@@ -9,10 +9,10 @@ permissions:
   contents: write
 
 jobs:
-  sync:
+  sync-branches:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout your fork
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -23,25 +23,31 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      - name: Add upstream
+      - name: Add upstream remote
         run: |
           git remote add upstream https://github.com/PR3Y/Bruce.git || true
           git fetch upstream
 
-      - name: Sync main (excluding .github/workflows)
-        run: |
-          git checkout main
-          git merge upstream/main --no-edit
-          git checkout HEAD -- . ':!.github/workflows/'
-          git add -A
-          git commit -m "Sync main from upstream (skip workflows)" || echo "Nothing to commit"
-          git push origin main
-
-      - name: Sync dev (excluding .github/workflows)
+      - name: Sync dev branch (exclude .github/workflows)
         run: |
           git checkout dev || git checkout -b dev
-          git merge upstream/dev --no-edit
+          git merge upstream/dev --no-edit || true
           git checkout HEAD -- . ':!.github/workflows/'
           git add -A
-          git commit -m "Sync dev from upstream (skip workflows)" || echo "Nothing to commit"
-          git push origin dev --force-with-lease
+          git commit -m "Sync dev from upstream (skip workflows)" || echo "No changes to commit on dev"
+          git push origin dev --force-with-lease || true
+
+      - name: Sync main branch (exclude .github/workflows)
+        run: |
+          git checkout main || git checkout -b main
+          git merge upstream/main --no-edit || true
+          git checkout HEAD -- . ':!.github/workflows/'
+          git add -A
+          git commit -m "Sync main from upstream (skip workflows)" || echo "No changes to commit on main"
+          git push origin main --force-with-lease || true
+
+      - name: Log final status
+        run: |
+          git remote -v
+          git log --oneline -5 origin/dev
+          git log --oneline -5 origin/main
