@@ -9,10 +9,10 @@ permissions:
   contents: write
 
 jobs:
-  sync-branches:
+  sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout your fork
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -23,17 +23,25 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      - name: Set up upstream remote
+      - name: Add upstream
         run: |
           git remote add upstream https://github.com/PR3Y/Bruce.git || true
           git fetch upstream
 
-      - name: Sync dev branch
+      - name: Sync main (excluding .github/workflows)
         run: |
-          git checkout -B dev upstream/dev
-          git push origin dev --force-with-lease
+          git checkout main
+          git merge upstream/main --no-edit
+          git checkout HEAD -- . ':!.github/workflows/'
+          git add -A
+          git commit -m "Sync main from upstream (skip workflows)" || echo "Nothing to commit"
+          git push origin main
 
-      - name: Sync main branch
+      - name: Sync dev (excluding .github/workflows)
         run: |
-          git checkout -B main upstream/main
-          git push origin main --force-with-lease
+          git checkout dev || git checkout -b dev
+          git merge upstream/dev --no-edit
+          git checkout HEAD -- . ':!.github/workflows/'
+          git add -A
+          git commit -m "Sync dev from upstream (skip workflows)" || echo "Nothing to commit"
+          git push origin dev --force-with-lease
