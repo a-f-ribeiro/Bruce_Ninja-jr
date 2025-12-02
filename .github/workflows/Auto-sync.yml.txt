@@ -1,0 +1,36 @@
+name: Auto Sync Bruce Branches
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  sync-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git config checkout.defaultRemote origin
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/PR3Y/Bruce.git
+          git fetch upstream
+
+      - name: Sync branches
+        run: |
+          git checkout dev
+          git merge upstream/dev
+          git push origin dev
+          
+          git checkout main
+          git merge upstream/main 
+          git push origin main
