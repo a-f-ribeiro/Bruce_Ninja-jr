@@ -14,7 +14,6 @@ void nrf_jammer() {
     byte Test_channels[] = {50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 2,  4,  6,  8,
                             10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48};
 
-    // Channel groups
     byte wifi_channels[] = {
         2,
         7,
@@ -23,7 +22,7 @@ void nrf_jammer() {
         22,
         27,
         32,
-        37, // WiFi 2412–2442 MHz
+        37,
         42,
         47,
         52,
@@ -31,7 +30,7 @@ void nrf_jammer() {
         62,
         67,
         72,
-        77 // WiFi 2447–2487 MHz
+        77
     };
     byte ble_channels[] = {2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
                            22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41};
@@ -98,17 +97,13 @@ void nrf_jammer() {
                 tft.fillRect(10, 100, tftWidth - 20, FM * LH, bruceConfig.bgColor);
                 tft.print("MODE : " + String(modes[modeIndex].name));
                 tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
-                Serial.println(modes[modeIndex].name);
                 redraw = false;
-                delay(200);
             }
 
-            // Hop through channels
             hopIndex++;
             if (hopIndex >= modes[modeIndex].count) hopIndex = 0;
             NRFradio.setChannel(modes[modeIndex].channels[hopIndex]);
 
-            // Change mode
             if (check(NextPress)) {
                 modeIndex++;
                 if (modeIndex >= (int)(sizeof(modes) / sizeof(modes[0]))) modeIndex = 0;
@@ -140,7 +135,7 @@ void nrf_channel_jammer() {
     if (nrf_start()) {
         Serial.println("NRF24 turned On");
 
-        int channel = 50; /// we start at 50 as on lower channel the cw wont work correctly
+        int channel = 50;
         bool redraw = true;
 
         NRFradio.setPALevel(RF24_PA_MAX);
@@ -153,7 +148,7 @@ void nrf_channel_jammer() {
 
         while (!check(SelPress)) {
             if (redraw) {
-                int freq = 2400 + channel; // MHz
+                int freq = 2400 + channel;
                 tft.setCursor(10, 35);
                 tft.setTextSize(FM);
                 tft.println("NRF Channel Jammer");
@@ -165,13 +160,11 @@ void nrf_channel_jammer() {
                 tft.setCursor(10, 116);
                 tft.fillRect(10, 116, tftWidth - 20, FM * LH, bruceConfig.bgColor);
                 tft.printf("Freq : %d MHz", freq);
-                Serial.println("CH " + String(channel) + " (" + String(freq) + " MHz)");
                 tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
                 redraw = false;
                 delay(200);
             }
 
-            // Next/Prev channel
             if (check(NextPress)) {
 
                 channel++;
